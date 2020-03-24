@@ -4,10 +4,20 @@ from naiveBayesClassifier.trainer import Trainer
 from naiveBayesClassifier.classifier import Classifier
 import csv
 import numpy as np
+import argparse
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--train')
+parser.add_argument('--test')
+parser.add_argument('--result')
+args = parser.parse_args()
+
+arg_train = args.train if args.train else 'data/nm_kind_wo_person.txt'
+arg_test = args.test if args.test == '' else 'data/nm_test2.txt'
+arg_result = args.result if args.result else 'data/nm_test_wo_person_result2.csv'
 
 # https://github.com/muatik/naive-bayes-classifier
-
 
 tokenizer = Tokenizer()
 # https://kkamikoon.tistory.com/119
@@ -27,10 +37,10 @@ exam02_train = 'data/nm_kind_wo_person.txt'
 exam02_test = 'data/nm_test2.txt'
 exam02_result = 'data/nm_test_wo_person_result2.csv'
 
-with open(exam02_train, newline='', encoding=file_encoding) as csvfile:
+with open(arg_train, newline='', encoding=file_encoding) as csvfile:
     reader = csv.DictReader(csvfile, delimiter='\t')
     for applicant in reader:
-        print(applicant['nm'], applicant['kind_code'])
+        # print(applicant['nm'], applicant['kind_code'])
         ApplicantTrainer.train(text=applicant['nm'], className=applicant['kind_code'])
 
 ApplicantClassifier = Classifier(ApplicantTrainer.data, tokenizer)
@@ -47,19 +57,15 @@ results = []
 #
 # print(results[:3])
 
-with open(exam02_test, newline='', mode='rt') as testfile:
+
+results = []
+with open(arg_test, newline='', mode='rt') as testfile:
     for line in testfile:
         # print(line.strip())
         classification = np.array(ApplicantClassifier.classify(line.strip()))
         # print(classification[0][0])
         results.append((line.strip(), classification[0][0]))
 
-
-with open(exam02_result, newline='', mode='w', encoding='utf-8') as write_file:
+with open(arg_result, newline='', mode='w', encoding='utf-8') as write_file:
     writer = csv.writer(write_file, delimiter='\t')
     writer.writerows(results)
-#
-# with open('data/nm_test_result.txt', 'w') as f:
-#     for item in results:
-#         print(item)
-        # f.write('{}\n'.format(item[0], item[1]))
